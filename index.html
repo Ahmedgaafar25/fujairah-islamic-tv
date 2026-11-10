@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fujairah Islamic TV Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: url('https://images.unsplash.com/photo-1565552645632-d725f8bfc19a?q=80&w=1920&auto=format&fit=crop') no-repeat center center/cover;
+    color: #ffffff;
+    position: relative;
+    background-color: #050f23;
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(5, 15, 35, 0.65) 0%,
+      rgba(5, 15, 35, 0.25) 45%,
+      rgba(5, 15, 35, 0.92) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 38px 56px;
+  }
+
+  /* الشريط العلوي */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    direction: ltr;
+  }
+
+  .clock-widget {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+  }
+
+  .time-box {
+    text-align: left;
+  }
+
+  .greeting {
+    font-size: 15px;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    opacity: 0.9;
+    font-weight: 700;
+  }
+
+  .clock {
+    font-size: 74px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  .clock span {
+    font-size: 24px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  .divider {
+    width: 2px;
+    height: 85px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .info-box {
+    direction: rtl;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hijri-temp {
+    font-size: 23px;
+    font-weight: 700;
+  }
+
+  .next-prayer {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffd166;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gregorian {
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    opacity: 0.85;
+    text-transform: uppercase;
+    direction: ltr;
+    text-align: right;
+  }
+
+  /* أزرار التحكم العلوية */
+  .top-actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .btn-glass {
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 19px;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .btn-glass.icon-only {
+    padding: 12px 18px;
+    border-radius: 50%;
+  }
+
+  .btn-glass:focus,
+  .btn-glass:hover {
+    background: rgba(255, 255, 255, 0.32);
+    border-color: #ffffff;
+    transform: scale(1.06);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  /* القسم السفلي */
+  .bottom-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .header-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    direction: ltr;
+  }
+
+  .active-title {
+    font-size: 50px;
+    font-weight: 800;
+    text-align: left;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+    padding-left: 8px;
+  }
+
+  .now-playing-bar {
+    font-size: 16px;
+    background: rgba(16, 185, 129, 0.22);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    color: #a7f3d0;
+    padding: 6px 18px;
+    border-radius: 30px;
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    direction: rtl;
+  }
+
+  .now-playing-bar.visible {
+    display: inline-flex;
+  }
+
+  /* شبكة البطاقات */
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 18px;
+    direction: ltr;
+  }
+
+  .card {
+    height: 155px;
+    border-radius: 22px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    text-align: right;
+    cursor: pointer;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    outline: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:focus,
+  .card:hover {
+    transform: scale(1.06) translateY(-6px);
+    border-color: #ffffff;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+    z-index: 2;
+  }
+
+  .card-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .card-sub {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 600;
+  }
+
+  /* ألوان البطاقات المطابقة للصورة */
+  .c-kahf    { background: linear-gradient(135deg, rgba(16, 110, 109, 0.88), rgba(9, 64, 68, 0.92)); }
+  .c-baqarah { background: linear-gradient(135deg, rgba(168, 155, 165, 0.88), rgba(110, 99, 108, 0.92)); }
+  .c-radio   { background: linear-gradient(135deg, rgba(128, 60, 115, 0.88), rgba(78, 30, 70, 0.92)); }
+  .c-sabah   { background: linear-gradient(135deg, rgba(196, 110, 95, 0.88), rgba(145, 68, 55, 0.92)); }
+  .c-masaa   { background: linear-gradient(135deg, rgba(38, 88, 168, 0.88), rgba(20, 52, 110, 0.92)); }
+  .c-ruqyah  { background: linear-gradient(135deg, rgba(22, 92, 148, 0.88), rgba(12, 54, 92, 0.92)); }
+
+  .status-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 4px 12px;
+    border-radius: 14px;
+    display: none;
+    direction: rtl;
+  }
+
+  .card.playing .status-badge {
+    display: inline-block;
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.5);
+  }
+
+  /* شريط التطبيقات السفلي */
+  .apps-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 18px;
+    direction: ltr;
+    margin-top: 2px;
+  }
+
+  .app-tile {
+    height: 66px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .app-tile:focus,
+  .app-tile:hover {
+    border-color: #ffffff;
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.28);
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay">
+  <!-- الشريط العلوي -->
+  <div class="top-bar">
+    <div class="clock-widget">
+      <div class="time-box">
+        <div class="greeting" id="greeting">GOOD AFTERNOON</div>
+        <div class="clock" id="clock">12:23<span>PM</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="info-box">
+        <div class="hijri-temp" id="hijri-date">☀️ 28° • --</div>
+        <div class="next-prayer" id="prayer-countdown">🕌 الفجيرة: جاري تحديث المواقيت...</div>
+        <div class="gregorian" id="greg-date">LOADING...</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn-glass icon-only" tabindex="0" onclick="stopAudio()" title="إيقاف التلاوة">✋</button>
+      <button class="btn-glass" tabindex="0" onclick="toggleFullscreen()">⚙️ Settings</button>
+    </div>
+  </div>
+
+  <!-- القسم السفلي والبطاقات -->
+  <div class="bottom-section">
+    <div class="header-status">
+      <div class="active-title" id="selected-title">سورة البقرة</div>
+      <div class="now-playing-bar" id="now-playing-bar">
+        <span>🔊 جاري التشغيل:</span>
+        <strong id="now-playing-name">--</strong>
+      </div>
+    </div>
+
+    <div class="cards-row" id="cards-container">
+      <div class="card c-kahf" tabindex="0" data-row="0" data-col="0"
+           data-title="سورة الكهف"
+           data-audio="https://server12.mp3quran.net/maher/018.mp3">
+        <span class="status-badge">▶ يعمل الآن</span>
+        <div class="card-title">سورة الكهف</div>
+        <div class="card-sub">ماهر المعيقلي</div>
+      </div>
+
+      <div class="card c-baqarah" tabindex="0" data-row="0" data-col="1"
+           data-title="سورة البقرة"
+           data-audio="https://server10.mp3quran.net/minsh/002.mp3">
+        <span class="status-badge">▶ يعمل الآن</span>
+        <div class="card-title">سورة البقرة</div>
+        <div class="card-sub">محمد صديق المنشاوي</div>
+      </div>
+
+      <div class="card c-radio" tabindex="0" data-row="0" data-col="2"
+           data-title="إذاعة القرآن الكريم"
+           data-audio="https://stream.radiojar.com/8s5u5tpdtwzuv">
+        <span class="status-badge">▶ بث مباشر</span>
+        <div class="card-title">إذاعة القرآن الكريم</div>
+        <div class="card-sub">من القاهرة - بث مباشر</div>
+      </div>
+
+      <div class="card c-sabah" tabindex="0" data-row="0" data-col="3"
+           data-title="أذكار الصباح"
+           data-audio="https://archive.org/download/Azkar_Sabah_Masaa/Azkar_Sabah.mp3">
+        <span class="status-badge">▶ يعمل الآن</span>
+        <div class="card-title">أذكار الصباح</div>
+        <div class="card-sub">أحمد النفيس</div>
+      </div>
+
+      <div class="card c-masaa" tabindex="0" data-row="0" data-col="4"
+           data-title="أذكار المساء"
+           data-audio="https://archive.org/download/Azkar_Sabah_Masaa/Azkar_Masaa.mp3">
+        <span class="status-badge">▶ يعمل الآن</span>
+        <div class="card-title">أذكار المساء</div>
+        <div class="card-sub">أحمد النفيس</div>
+      </div>
+
+      <div class="card c-ruqyah" tabindex="0" data-row="0" data-col="5"
+           data-title="الرقية الشرعية"
+           data-audio="https://server8.mp3quran.net/afs/roqia.mp3">
+        <span class="status-badge">▶ يعمل الآن</span>
+        <div class="card-title">الرقية الشرعية</div>
+        <div class="card-sub">أحمد النفيس</div>
+      </div>
+    </div>
+
+    <!-- شريط التطبيقات السفلي -->
+    <div class="apps-row">
+      <div class="app-tile" tabindex="0" onclick="launchApp('com.google.android.youtube.tv')">▶ YouTube</div>
+      <div class="app-tile" tabindex="0" onclick="launchApp('com.netflix.ninja')">Netflix</div>
+      <div class="app-tile" tabindex="0" onclick="launchApp('net.mbc.shahid.tv')">Shahid</div>
+      <div class="app-tile" tabindex="0" onclick="toggleFullscreen()">⛶ ملء الشاشة</div>
+      <div class="app-tile" tabindex="0" onclick="openSystemSettings()">⚙️ إعدادات الجهاز</div>
+      <div class="app-tile" tabindex="0" id="mute-btn">🔊 كتم / تشغيل</div>
+    </div>
+  </div>
+</div>
+
+<audio id="audio-player" preload="none"></audio>
+
+<script>
+  let currentTemp = '28°';
+  let prayerTimings = null;
+
+  // 1. جلب درجة الحرارة الحية لمدينة الفجيرة
+  async function fetchFujairahWeather() {
+    try {
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=25.1288&longitude=56.3265&current_weather=true');
+      const data = await res.json();
+      if (data.current_weather) {
+        currentTemp = `${Math.round(data.current_weather.temperature)}°`;
+      }
+    } catch (e) {}
+  }
+
+  // 2. جلب مواقيت الصلاة لمدينة الفجيرة - الإمارات (method=16: الهيئة العامة للشؤون الإسلامية والأوقاف)
+  async function fetchFujairahPrayers() {
+    try {
+      const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Fujairah&country=United%20Arab%20Emirates&method=16');
+      const data = await res.json();
+      prayerTimings = data.data.timings;
+      updatePrayerCountdown();
+    } catch (e) {
+      document.getElementById('prayer-countdown').textContent = '🕌 الفجيرة • تأكد من الاتصال بالإنترنت';
+    }
+  }
+
+  // 3. حساب العد التنازلي للصلاة القادمة في الفجيرة
+  function updatePrayerCountdown() {
+    if (!prayerTimings) return;
+    const prayers = [
+      { name: 'الفجر', time: prayerTimings.Fajr },
+      { name: 'الظهر', time: prayerTimings.Dhuhr },
+      { name: 'العصر', time: prayerTimings.Asr },
+      { name: 'المغرب', time: prayerTimings.Maghrib },
+      { name: 'العشاء', time: prayerTimings.Isha }
+    ];
+
+    const now = new Date();
+    for (let p of prayers) {
+      const cleanTime = p.time.split(' ')[0];
+      const [h, m] = cleanTime.split(':').map(Number);
+      const pDate = new Date();
+      pDate.setHours(h, m, 0, 0);
+
+      if (pDate > now) {
+        const diff = Math.floor((pDate - now) / 60000);
+        const hrs = Math.floor(diff / 60);
+        const mins = String(diff % 60).padStart(2, '0');
+        document.getElementById('prayer-countdown').textContent = `🕌 ${p.name} بعد ${hrs}:${mins}`;
+        return;
+      }
+    }
+
+    // إذا انتهت صلوات اليوم، نحسب لصلاة الفجر غداً
+    const cleanFajr = prayerTimings.Fajr.split(' ')[0];
+    const [fh, fm] = cleanFajr.split(':').map(Number);
+    const fajrTomorrow = new Date();
+    fajrTomorrow.setDate(fajrTomorrow.getDate() + 1);
+    fajrTomorrow.setHours(fh, fm, 0, 0);
+
+    const diff = Math.floor((fajrTomorrow - now) / 60000);
+    const hrs = Math.floor(diff / 60);
+    const mins = String(diff % 60).padStart(2, '0');
+    document.getElementById('prayer-countdown').textContent = `🕌 الفجر بعد ${hrs}:${mins}`;
+  }
+
+  // 4. تحديث الساعة والتاريخ الهجري والميلادي
+  function updateClock() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    const greeting = hours < 12 ? 'GOOD MORNING' : (hours < 18 ? 'GOOD AFTERNOON' : 'GOOD EVENING');
+    document.getElementById('greeting').textContent = greeting;
+
+    hours = hours % 12 || 12;
+    document.getElementById('clock').innerHTML = `${hours}:${minutes}<span>${ampm}</span>`;
+
+    // التاريخ الهجري
+    const hijriFormatter = new Intl.DateTimeFormat('ar-AE-u-ca-islamic', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    document.getElementById('hijri-date').textContent = `☀️ ${currentTemp} • ${hijriFormatter.format(now)}`;
+
+    // التاريخ الميلادي
+    const gregFormatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+    document.getElementById('greg-date').textContent = gregFormatter.format(now).toUpperCase();
+  }
+
+  fetchFujairahWeather();
+  fetchFujairahPrayers();
+  setInterval(updateClock, 1000);
+  setInterval(updatePrayerCountdown, 20000);
+  setInterval(fetchFujairahWeather, 1800000);
+  updateClock();
+
+  // 5. تشغيل الصوتيات والتنقل بالريموت
+  const cards = document.querySelectorAll('.card');
+  const titleEl = document.getElementById('selected-title');
+  const player = document.getElementById('audio-player');
+  const playingBar = document.getElementById('now-playing-bar');
+  const playingName = document.getElementById('now-playing-name');
+
+  // التركيز الافتراضي على بطاقة سورة البقرة كما في الصورة
+  cards[1].focus();
+
+  cards.forEach(card => {
+    card.addEventListener('focus', () => {
+      titleEl.textContent = card.dataset.title;
+    });
+
+    card.addEventListener('click', () => {
+      const src = card.dataset.audio;
+      const title = card.dataset.title;
+
+      if (player.src === src && !player.paused) {
+        player.pause();
+        card.classList.remove('playing');
+        playingBar.classList.remove('visible');
+      } else {
+        cards.forEach(c => c.classList.remove('playing'));
+        player.src = src;
+        player.play().catch(() => {});
+        card.classList.add('playing');
+        playingName.textContent = title;
+        playingBar.classList.add('visible');
+      }
+    });
+  });
+
+  function stopAudio() {
+    player.pause();
+    cards.forEach(c => c.classList.remove('playing'));
+    playingBar.classList.remove('visible');
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+
+  function openSystemSettings() {
+    if (window.AndroidBridge && window.AndroidBridge.openSettings) {
+      window.AndroidBridge.openSettings();
+    } else {
+      toggleFullscreen();
+    }
+  }
+
+  function launchApp(pkg) {
+    if (window.AndroidBridge && window.AndroidBridge.launchPackage) {
+      window.AndroidBridge.launchPackage(pkg);
+    }
+  }
+
+  // دعم كامل لأزرار الأسهم وزر OK في ريموت التلفزيون
+  document.addEventListener('keydown', (e) => {
+    const focusable = Array.from(document.querySelectorAll('[tabindex="0"]'));
+    const idx = focusable.indexOf(document.activeElement);
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (idx < focusable.length - 1) focusable[idx + 1].focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (idx > 0) focusable[idx - 1].focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (idx < 2) focusable[3].focus();
+      else if (idx + 6 < focusable.length) focusable[idx + 6].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (idx >= 8) focusable[idx - 6].focus();
+      else if (idx >= 2) focusable[1].focus();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (document.activeElement) document.activeElement.click();
+    }
+  });
+
+  document.getElementById('mute-btn').addEventListener('click', (e) => {
+    player.muted = !player.muted;
+    e.currentTarget.textContent = player.muted ? '🔇 إلغاء الكتم' : '🔊 كتم / تشغيل';
+  });
+</script>
+
+</body>
+</html>
